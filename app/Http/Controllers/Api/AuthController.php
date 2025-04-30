@@ -7,17 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\LoginRequest;
+use Illuminate\Support\Str;
 class AuthController extends Controller
 {
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
 {
-    $request->validate([
-        'email' => 'required|email|max:255',
-        'password' => 'required|string|min:8|max:255'
-    ]);
-    
-    $user = User::where('email', $request->email)->first();
 
+    $user = User::where('email', $request->email)->first();
     if (!$user || !Hash::check($request->password, $user->password)) {
         return response()->json(['message' => 'Invalid credentials'], 401);
     }
@@ -30,31 +28,32 @@ class AuthController extends Controller
     ], 200);
 }
 
-public function register(Request $request): JsonResponse
+public function register(RegisterRequest $request): JsonResponse
 {
-    $request->validate([
-        'email' => 'required|email|unique:users,email|max:255',
-        'name' => 'required|string|max:255', 
-        'password' => 'required|string|min:8|max:255'
-    ]);
-    
     $user = User::create([
         'name' => $request->name,
         'email' => $request->email,
-        'password' => Hash::make($request->password)
+        'password' => Hash::make($request->password),
+        'remember_token' => Str::random(60),
     ]);
 
     if ($user) {
         $token = $user->createToken($user->name, ['Auth-Token'])->plainTextToken;
+
+        $user->remember_token = $token;
+        $user->save();
+        
         return response()->json([
             'message' => 'Registration successful',
-            'token_type' => 'Bearer', 
-            'token' => $token
+            'token_type' => 'Bearer',
+            'token' => $token,
+            'remember_token' => $user->remember_token,
         ], 201);
     } else {
         return response()->json(['message' => 'User not created'], 500);
     }
 }
+
 public function profile(Request $request)
 {
     $user = $request->user();
