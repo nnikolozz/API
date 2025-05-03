@@ -16,42 +16,38 @@ class TaskController extends Controller
 
 {
     public function index(Request $request)
-    {
-        $user = $request->user(); 
-    
-        $tasksQuery = Task::query();
+{
+    $user = $request->user();
+    $tasksQuery = Task::query();
 
-        $tasksQuery = Task::with('category');
-        $tasksQuery = Task::with('user');
+    $tasksQuery = Task::with(['category', 'user']);
 
-
-
-    
-        if ($request->has('status')) {
-            $tasksQuery->where('status', $request->status); 
-        }
-    
-        if ($request->has('priority')) {
-            $tasksQuery->where('priority', $request->priority); 
-        }
-    
-        if ($request->has('due_date')) {
-            $tasksQuery->whereDate('due_date', $request->due_date); 
-        }
-        $tasks = $tasksQuery->get();
-        // $category = Category::where('id',$tasksQuery->category_id);
-
-    
-        if ($tasks->isEmpty()) {
-            return response()->json(['message' => 'No tasks found'], 404);
-        }
-    
-        return response()->json([
-            'message' => 'Tasks fetched successfully',
-            'data' => $tasks,
-            // 'category'=>$category
-        ], 200);
+    if ($request->has('status')) {
+        $tasksQuery->where('status', $request->status); 
     }
+
+    if ($request->has('priority')) {
+        $tasksQuery->where('priority', $request->priority); 
+    }
+    
+
+    if ($request->has('due_date')) {
+        $tasksQuery->whereDate('due_date', $request->due_date); 
+    }
+    if( $request->has('title')) {
+        $tasksQuery->where('title', $request->title);
+    }
+    $tasks = $tasksQuery->get();
+
+    if ($tasks->isEmpty()) {
+        return response()->json(['message' => 'No tasks found'], 404);
+    }
+
+    return response()->json([
+        'message' => 'Tasks fetched successfully',
+        'data' => $tasks
+    ], 200);
+}
 
 
 
@@ -77,15 +73,23 @@ public function store (TaskRequest $request){
 public function profile(Request $request)
 {
     $user = $request->user();
-    if($user){
-        $tasks = $user->tasks;
+
+    if ($user) {
+
         return response()->json([
             'message' => 'Profile fetched successfully',
-            'data' => $user,
-            'tasks' => $tasks
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'tasks' => $user->tasks
+            ]
         ], 200);
     }
+
+    return response()->json(['message' => 'User not found'], 404);
 }
+
 
 public function destroy($id, Request $request)
 {

@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Str;
+use App\Http\Requests\RegisterRequest;
 class AuthController extends Controller
 {
     public function login(LoginRequest $request): JsonResponse
@@ -59,9 +59,11 @@ public function profile(Request $request)
     $user = $request->user();
 
     if ($user) {
+        $tasks = $user->tasks()->get();
         return response()->json([
             'message' => 'Profile fetched successfully',
-            'data' => $user
+            'data' => $user,
+            'tasks' => $tasks
         ], 200);
     } else {
         return response()->json([
