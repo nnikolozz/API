@@ -1,5 +1,4 @@
 <?php
-
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +25,6 @@ class AuthControllerTest extends TestCase
                      'message',
                      'token_type',
                      'token',
-                     'remember_token'
                  ]);
 
         $this->assertDatabaseHas('users', ['email' => 'test@example.com']);
@@ -78,7 +76,7 @@ class AuthControllerTest extends TestCase
 
         $response->assertStatus(200)
                  ->assertJson([
-                     'message' => 'Logged out Successfully'
+                     'message' => 'Logged out successfully' 
                  ]);
     }
 }

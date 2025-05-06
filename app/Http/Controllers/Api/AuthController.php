@@ -37,11 +37,7 @@ public function register(RegisterRequest $request): JsonResponse
     ]);
 
     if ($user) {
-        $token = $user->createToken($user->name, ['Auth-Token'])->plainTextToken;
-
-        $user->remember_token = $token;
-        $user->save();
-        
+        $token = $user->createToken($user->name, ['Auth-Token'])->plainTextToken;        
         return response()->json([
             'message' => 'Registration successful',
             'token_type' => 'Bearer',
