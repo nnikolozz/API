@@ -34,7 +34,6 @@ public function register(RegisterRequest $request): JsonResponse
         'name' => $request->name,
         'email' => $request->email,
         'password' => Hash::make($request->password),
-        'remember_token' => Str::random(60),
     ]);
 
     if ($user) {
@@ -47,7 +46,6 @@ public function register(RegisterRequest $request): JsonResponse
             'message' => 'Registration successful',
             'token_type' => 'Bearer',
             'token' => $token,
-            'remember_token' => $user->remember_token,
         ], 201);
     } else {
         return response()->json(['message' => 'User not created'], 500);
@@ -71,19 +69,25 @@ public function profile(Request $request)
         ], 401);
     }
 }
-public function logout(Request $request){
-    $user = User::where('id',$request->user()->id)->first();
-    if($user){
-        $user->tokens()->delete();
+public function logout(Request $request)
+{
+    $user = $request->user();
+
+    if ($user) {
+        $user->currentAccessToken()->delete();
+
         return response()->json([
-            'message' => 'Logged out Successfully',
-            'data' => $user
+            'message' => 'Logged out successfully',
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email
+            ]
         ], 200);
     }
-    else{
-        return response()->json([
-            'message'=>'User not found'
-        ],400);
-    }
+
+    return response()->json([
+        'message' => 'User not found'
+    ], 400);
 }
 }

@@ -18,7 +18,6 @@ class TaskController extends Controller
     public function index(Request $request)
 {
     $user = $request->user();
-    $tasksQuery = Task::query();
 
     $tasksQuery = Task::with(['category', 'user']);
 
@@ -75,6 +74,7 @@ public function profile(Request $request)
     $user = $request->user();
 
     if ($user) {
+        $user->load('tasks.category'); 
 
         return response()->json([
             'message' => 'Profile fetched successfully',
@@ -90,12 +90,9 @@ public function profile(Request $request)
     return response()->json(['message' => 'User not found'], 404);
 }
 
-
-public function destroy($id, Request $request)
+public function destroy($id)
 {
-    $user = $request->user(); 
-
-    $task = $user->tasks()->find($id);
+    $task = Task::find($id);
 
     if (!$task) {
         return response()->json([
@@ -109,4 +106,5 @@ public function destroy($id, Request $request)
         'message' => 'Task deleted successfully'
     ], 200);
 }
+
 }

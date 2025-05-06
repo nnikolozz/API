@@ -13,14 +13,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/profile', [AuthController::class, 'profile']); 
     
-    Route::apiResource('tasks', TaskController::class)->except(['create', 'edit']);
+
      Route::get('/tasks', [TaskController::class, 'index']);
      Route::post('/tasks', [TaskController::class, 'store']);
      Route::get('/tasks/{task}', [TaskController::class, 'show']);
      Route::put('/tasks/{task}', [TaskController::class, 'update']);
      Route::get('/profile', [AuthController::class, 'profile']);
-
-     Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
+     Route::delete('/tasks/{id}', [TaskController::class, 'destroy']);
 });
 
 Route::apiResource('categories', CategoryController::class);
